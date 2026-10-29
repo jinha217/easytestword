@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Flash30 - 시험 직전 30분 초압축 암기노트</title>
+  <meta name="description" content="시험 직전 30분 동안 핵심 개념과 용어를 초고속으로 플립하며 복습하고 오답을 정복하는 다크모드 스피드 암기 웹 앱" />
+  <meta property="og:title" content="Flash30 - 시험 직전 30분 초압축 암기노트" />
+  <meta property="og:description" content="시험 직전 30분 동안 핵심 개념과 용어를 초고속으로 플립하며 복습하고 오답을 정복하는 다크모드 스피드 암기 웹 앱" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  
+  <style>
+    /* CSS Reset & Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-canvas: #090d16;
+      --bg-surface: #111726;
+      --bg-surface-elevated: #182238;
+      --bg-surface-hover: #1f2b45;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --accent-indigo: #6366f1;
+      --accent-indigo-light: #818cf8;
+      --accent-success: #10b981;
+      --accent-success-bg: rgba(16, 185, 129, 0.12);
+      --accent-danger: #f43f5e;
+      --accent-danger-bg: rgba(244, 63, 94, 0.12);
+      --accent-warning: #f59e0b;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 26px;
+
+      --font-main: -apple-system, BlinkMacSystemFont, "Pretendard Variable", "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+      letter-spacing: -0.015em;
+    }
+
+    /* Layout Container */
+    .app-wrapper {
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header & Timer */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+
+    .brand-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2.2;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .brand-title .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-indigo-light);
+      background: rgba(99, 102, 241, 0.15);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+    }
+
+    /* 30m Countdown Timer */
+    .timer-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .timer-pill.urgent {
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fda4af;
+      background: rgba(244, 63, 94, 0.08);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    .timer-val {
+      font-weight: 700;
+      color: #fff;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .timer-ctrl-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+
+    .timer-ctrl-btn:hover {
+      color: #fff;
+    }
+
+    /* Progress & Stats Bar */
+    .progress-section {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .stats-chips {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+    }
+
+    .stat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .stat-dot.known { background: var(--accent-success); }
+    .stat-dot.wrong { background: var(--accent-danger); }
+    .stat-dot.remain { background: var(--text-muted); }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 7px;
+      background: var(--bg-surface);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4f46e5, #10b981);
+      border-radius: 999px;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Controls Bar: Filters & Actions */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-filters {
+      display: flex;
+      background: var(--bg-surface);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: calc(var(--radius-md) - 3px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .filter-tab .badge {
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+    }
+
+    .action-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 13px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Main Flashcard Stage */
+    .flashcard-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 28px 0 24px;
+      position: relative;
+      width: 100%;
+    }
+
+    .card-perspective-container {
+      perspective: 1200px;
+      width: 100%;
+      max-width: 620px;
+      height: 380px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    @media (max-width: 640px) {
+      .card-perspective-container {
+        height: 340px;
+      }
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+      border-radius: var(--radius-xl);
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--radius-xl);
+      padding: 32px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Front Face (Concept/Keyword) */
+    .card-face.front {
+      background: linear-gradient(170deg, #131a29 0%, #0d121c 100%);
+    }
+
+    /* Back Face (Explanation/Meaning) */
+    .card-face.back {
+      background: linear-gradient(170deg, #162035 0%, #101625 100%);
+      transform: rotateY(180deg);
+    }
+
+    .card-perspective-container:hover .card-face {
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .card-top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .card-category-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-indigo-light);
+      background: rgba(99, 102, 241, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .card-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .card-status-badge.known {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+    }
+    .card-status-badge.wrong {
+      color: #fb7185;
+      background: rgba(244, 63, 94, 0.15);
+    }
+    .card-status-badge.unseen {
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-body-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+
+    .front .card-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      letter-spacing: -0.025em;
+      word-break: keep-all;
+    }
+
+    .front .card-hint {
+      margin-top: 14px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .front .card-hint svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-indigo-light);
+    }
+
+    .back .card-definition {
+      font-size: 1.15rem;
+      color: #e2e8f0;
+      line-height: 1.65;
+      font-weight: 400;
+      word-break: keep-all;
+      max-width: 520px;
+    }
+
+    .card-bottom-hint {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .card-bottom-hint kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    /* Decision Response Buttons */
+    .decision-actions {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      max-width: 620px;
+      margin-top: 20px;
+    }
+
+    .btn-decision {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-decision kbd {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 2px;
+    }
+
+    .btn-wrong {
+      background: var(--accent-danger-bg);
+      color: #fda4af;
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-wrong:hover {
+      background: rgba(244, 63, 94, 0.22);
+      border-color: var(--accent-danger);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(244, 63, 94, 0.35);
+    }
+
+    .btn-wrong kbd {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fecdd3;
+    }
+
+    .btn-known {
+      background: var(--accent-success-bg);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-known:hover {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: var(--accent-success);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-known kbd {
+      background: rgba(16, 185, 129, 0.2);
+      color: #a7f3d0;
+    }
+
+    /* Deck Nav (Prev/Next/Shuffle) */
+    .deck-navigation {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .nav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .deck-page-indicator {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      min-width: 65px;
+      text-align: center;
+    }
+
+    /* Empty State / Finished State */
+    .stage-message-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 48px 32px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stage-icon-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .stage-icon-circle.celebrate {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-success);
+    }
+    .stage-icon-circle.empty {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-indigo-light);
+    }
+
+    .stage-icon-circle svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .stage-msg-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .stage-msg-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .msg-action-btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent-indigo);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover {
+      background: #4f46e5;
+      transform: translateY(-1px);
+    }
+
+    /* Modal Backdrop & Dialog (For Add Concept & Manage List) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 580px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      transform: translateY(12px) scale(0.97);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .modal-overlay.open .modal-container {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: #fff;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .form-textarea {
+      min-height: 90px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* List Management in Modal */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .list-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .list-card-content {
+      flex: 1;
+    }
+
+    .list-card-term {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .list-card-def {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .btn-icon-danger {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: color 0.15s ease, background 0.15s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-icon-danger:hover {
+      color: var(--accent-danger);
+      background: rgba(244, 63, 94, 0.1);
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-box.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer / Keyboard Info */
+    footer {
+      margin-top: auto;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .shortcut-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .shortcut-legend span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .shortcut-legend kbd {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Top Header -->
+    <header>
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="brand-title">
+          Flash30
+          <span class="badge">D-30M CRAM</span>
+        </div>
+      </div>
+
+      <!-- 30-min Timer Widget -->
+      <div class="timer-pill" id="timerPill" title="시험 직전 30분 타이머">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span class="timer-val" id="timerDisplay">30:00</span>
+        <button class="timer-ctrl-btn" id="timerToggleBtn" title="시작/일시정지">
+          <svg id="timerIconPlay" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+        <button class="timer-ctrl-btn" id="timerResetBtn" title="30분으로 리셋">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress & Counters -->
+    <section class="progress-section" aria-label="학습 진행도">
+      <div class="progress-header">
+        <div class="stats-chips">
+          <div class="stat-item" title="암기 완료한 개념">
+            <span class="stat-dot known"></span>
+            <span>아는 개념</span>
+            <span class="stat-val" id="knownCount">0</span>
+          </div>
+          <div class="stat-item" title="다시 복습해야 하는 오답">
+            <span class="stat-dot wrong"></span>
+            <span>오답</span>
+            <span class="stat-val" id="wrongCount">0</span>
+          </div>
+          <div class="stat-item" title="남은 미학습 카드">
+            <span class="stat-dot remain"></span>
+            <span>미완료</span>
+            <span class="stat-val" id="remainCount">0</span>
+          </div>
+        </div>
+
+        <div style="font-family: var(--font-mono); font-weight: 600; color: #fff;">
+          진행률 <span id="progressPercent">0%</span>
+        </div>
+      </div>
+
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </section>
+
+    <!-- Controls: Filter Tabs + Modals -->
+    <section class="controls-bar">
+      <div class="tab-filters">
+        <button class="filter-tab active" id="tabAll" onclick="setFilter('all')">
+          전체 보기 <span class="badge" id="badgeAllCount">0</span>
+        </button>
+        <button class="filter-tab" id="tabWrong" onclick="setFilter('wrong')">
+          오답만 모아보기 <span class="badge" id="badgeWrongCount">0</span>
+        </button>
+      </div>
+
+      <div class="action-group">
+        <button class="btn-secondary" onclick="openAddModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          개념 추가
+        </button>
+        <button class="btn-secondary" onclick="openManageModal()" title="개념 목록 및 데이터 관리">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          목록 관리
+        </button>
+      </div>
+    </section>
+
+    <!-- Flashcard Stage (Interactive Area) -->
+    <main class="flashcard-stage" id="flashcardStage">
+      <!-- Card Container (dynamically injected / toggled) -->
+      <div class="card-perspective-container" id="cardContainer" onclick="toggleCardFlip()">
+        <div class="flashcard" id="activeCardElement">
+          <!-- Front Side -->
+          <div class="card-face front">
+            <div class="card-top-meta">
+              <span class="card-category-tag" id="cardCategory">CORE CONCEPT</span>
+              <span class="card-status-badge unseen" id="cardStatusBadge">학습 전</span>
+            </div>
+
+            <div class="card-body-content">
+              <h2 class="card-title" id="cardKeyword">로딩 중...</h2>
+              <p class="card-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                카드를 탭하거나 Space 키를 눌러 뜻 확인
+              </p>
+            </div>
+
+            <div class="card-bottom-hint">
+              <span>카드 뒤집기</span> <kbd>Space</kbd> / <kbd>Click</kbd>
+            </div>
+          </div>
+
+          <!-- Back Side -->
+          <div class="card-face back">
+            <div class="card-top-meta">
+              <span class="card-category-tag" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">DEFINITION</span>
+              <span class="card-status-badge unseen" id="cardStatusBadgeBack">학습 전</span>
+            </div>
+
+            <div class="card-body-content">
+              <p class="card-definition" id="cardMeaning">개념 정의</p>
+            </div>
+
+            <div class="card-bottom-hint">
+              <span>아래 버튼을 눌러 정답/오답을 체크하세요</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decision Buttons (Below Card) -->
+      <div class="decision-actions" id="decisionActions">
+        <button class="btn-decision btn-wrong" onclick="markCurrentCard('wrong')" title="아직 헷갈리거나 틀린 개념">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          오답 (다시 보기)
+          <kbd>1</kbd>
+        </button>
+
+        <button class="btn-decision btn-known" onclick="markCurrentCard('known')" title="확실하게 암기한 개념">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="9 12 11 14 15 10"></polyline>
+          </svg>
+          아는 개념
+          <kbd>2</kbd>
+        </button>
+      </div>
+
+      <!-- Deck Nav Controller -->
+      <div class="deck-navigation" id="deckNavigation">
+        <button class="nav-btn" onclick="prevCard()" id="btnPrev" title="이전 카드 (↑)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="deck-page-indicator" id="deckIndicator">0 / 0</div>
+
+        <button class="nav-btn" onclick="nextCard()" id="btnNext" title="다음 카드 (↓)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <button class="nav-btn" onclick="shuffleCurrentDeck()" title="카드 무작위 셔플">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Empty / Completed Message View (Hidden by default) -->
+      <div class="stage-message-card" id="stageMessageCard" style="display: none;">
+        <div class="stage-icon-circle" id="stageMsgIcon"></div>
+        <h3 class="stage-msg-title" id="stageMsgTitle">완료</h3>
+        <p class="stage-msg-desc" id="stageMsgDesc">메시지 내용</p>
+        <div class="msg-action-btns" id="stageMsgActions"></div>
+      </div>
+    </main>
+
+    <!-- Bottom Footer with Shortcut Legend -->
+    <footer>
+      <div class="shortcut-legend">
+        <span><kbd>Space</kbd> 뒤집기</span>
+        <span><kbd>1</kbd> 오답</span>
+        <span><kbd>2</kbd> 아는개념</span>
+        <span><kbd>←</kbd><kbd>→</kbd> 이전/다음</span>
+      </div>
+      <div>
+        <span>LocalStorage 자동 저장됨</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal 1: Add Concept -->
+  <div class="modal-overlay" id="addModalOverlay" onclick="handleBackdropClick(event, 'addModalOverlay')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">새 핵심 개념 등록</h3>
+        <button class="modal-close-btn" onclick="closeAddModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="addConceptForm" onsubmit="handleAddConcept(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="inputTerm">핵심 키워드 / 개념명 <span style="color: var(--accent-danger);">*</span></label>
+            <input type="text" id="inputTerm" class="form-input" placeholder="예: 멱등성 (Idempotence)" required autocomplete="off" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputDef">설명 및 핵심 뜻 <span style="color: var(--accent-danger);">*</span></label>
+            <textarea id="inputDef" class="form-textarea" placeholder="시험에 직결되는 핵심 포인트와 정의를 압축해서 작성하세요." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputCategory">과목 / 분류 태그 (선택)</label>
+            <input type="text" id="inputCategory" class="form-input" placeholder="예: 컴퓨터공학, 경영학, 화학 등" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeAddModal()">취소</button>
+          <button type="submit" class="btn-primary">등록하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Manage Concept List -->
+  <div class="modal-overlay" id="manageModalOverlay" onclick="handleBackdropClick(event, 'manageModalOverlay')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div style="display: flex; align-items: baseline; gap: 8px;">
+          <h3 class="modal-title">등록된 개념 목록</h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);" id="manageListCount">0개</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeManageModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <input type="text" id="manageSearchInput" class="form-input" placeholder="개념 검색..." oninput="filterManageList()" style="max-width: 280px; padding: 7px 12px; font-size: 0.85rem;" />
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" style="font-size: 0.75rem; padding: 6px 10px;" onclick="resetSampleData()" title="기본 제공 샘플 5개로 복원">샘플 복원</button>
+            <button class="btn-secondary" style="font-size: 0.75rem; padding: 6px 10px; color: #fda4af;" onclick="clearAllData()">전체 삭제</button>
+          </div>
+        </div>
+
+        <div class="item-list" id="manageItemsContainer">
+          <!-- Dynamic cards injected here -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeManageModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div class="toast-box" id="toastBox">
+    <span id="toastMsg">알림 메시지</span>
+  </div>
+
+  <!-- Application Logic (Vanilla JS, 100% Self-Contained) -->
+  <script>
+    // Initial 5 High-Quality Sample Concepts for Exam Cramming
+    const DEFAULT_SAMPLES = [
+      {
+        id: "sample-1",
+        term: "파레토 법칙 (80/20 법칙)",
+        definition: "전체 결과의 80%가 전체 원인의 20%에서 일어난다는 현상. 시험 직전 20%의 핵심 개념이 시험 점수의 80%를 결정한다.",
+        category: "경영·통계",
+        status: "unseen" // unseen | known | wrong
+      },
+      {
+        id: "sample-2",
+        term: "오컴의 면도날 (Occam's Razor)",
+        definition: "어떤 현상을 설명할 때 불필요하게 많은 가정을 도입해서는 안 되며, 동등한 설명력을 가진다면 가장 단순한 가설을 채택해야 한다는 원리.",
+        category: "철학·과학방법론",
+        status: "unseen"
+      },
+      {
+        id: "sample-3",
+        term: "멱등성 (Idempotence)",
+        definition: "동일한 연산을 여러 번 적용하더라도 결과가 달라지지 않는 성질. HTTP 메서드에서 GET, PUT, DELETE는 멱등성을 지니며 POST는 멱등하지 않다.",
+        category: "컴퓨터공학",
+        status: "unseen"
+      },
+      {
+        id: "sample-4",
+        term: "트랜잭션 ACID 원칙",
+        definition: "데이터베이스 무결성을 보장하는 4대 속성: 원자성(Atomicity), 일관성(Consistency), 격리성(Isolation), 영속성(Durability).",
+        category: "데이터베이스",
+        status: "unseen"
+      },
+      {
+        id: "sample-5",
+        term: "폰 노이만 구조 (Von Neumann Architecture)",
+        definition: "프로그램과 데이터를 동일한 메모리에 저장하여 순차적으로 읽어와 처리하는 내장형 프로그램 방식. 병목 현상(Von Neumann Bottleneck)이 존재함.",
+        category: "컴퓨터구조",
+        status: "unseen"
+      }
+    ];
+
+    const STORAGE_KEY = 'flash30_cards_data_v1';
+    const TIMER_KEY = 'flash30_timer_state_v1';
+
+    // State
+    let cards = [];
+    let currentFilter = 'all'; // 'all' | 'wrong'
+    let currentDeck = [];
+    let currentIndex = 0;
+    let isFlipped = false;
+
+    // Timer State (30 minutes default)
+    const TOTAL_SECONDS = 30 * 60;
+    let timerRemaining = TOTAL_SECONDS;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Initialize App
+    function initApp() {
+      loadCardsFromStorage();
+      setupTimer();
+      setupKeyboardShortcuts();
+      applyFilter(currentFilter);
+    }
+
+    // Load Data from LocalStorage
+    function loadCardsFromStorage() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cards = parsed;
+          } else {
+            cards = [...DEFAULT_SAMPLES];
+            saveCardsToStorage();
+          }
+        } else {
+          cards = [...DEFAULT_SAMPLES];
+          saveCardsToStorage();
+        }
+      } catch (e) {
+        console.error('Storage read error:', e);
+        cards = [...DEFAULT_SAMPLES];
+      }
+    }
+
+    function saveCardsToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      } catch (e) {
+        console.error('Storage write error:', e);
+      }
+      updateStatsUI();
+    }
+
+    // Filter Logic
+    function setFilter(type) {
+      currentFilter = type;
+      document.getElementById('tabAll').classList.toggle('active', type === 'all');
+      document.getElementById('tabWrong').classList.toggle('active', type === 'wrong');
+      applyFilter(type);
+    }
+
+    function applyFilter(type) {
+      if (type === 'wrong') {
+        currentDeck = cards.filter(c => c.status === 'wrong');
+      } else {
+        currentDeck = [...cards];
+      }
+
+      currentIndex = 0;
+      isFlipped = false;
+      renderCurrentCard();
+      updateStatsUI();
+    }
+
+    // Render Active Card
+    function renderCurrentCard() {
+      const cardContainer = document.getElementById('cardContainer');
+      const decisionActions = document.getElementById('decisionActions');
+      const deckNavigation = document.getElementById('deckNavigation');
+      const stageMessageCard = document.getElementById('stageMessageCard');
+      const activeCardElem = document.getElementById('activeCardElement');
+
+      // Reset flip state
+      isFlipped = false;
+      activeCardElem.classList.remove('flipped');
+
+      if (!currentDeck || currentDeck.length === 0) {
+        // Show Empty or Completed State
+        cardContainer.style.display = 'none';
+        decisionActions.style.display = 'none';
+        deckNavigation.style.display = 'none';
+        stageMessageCard.style.display = 'flex';
+
+        const msgIcon = document.getElementById('stageMsgIcon');
+        const msgTitle = document.getElementById('stageMsgTitle');
+        const msgDesc = document.getElementById('stageMsgDesc');
+        const msgActions = document.getElementById('stageMsgActions');
+
+        if (currentFilter === 'wrong') {
+          msgIcon.className = 'stage-icon-circle celebrate';
+          msgIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          msgTitle.textContent = "오답이 없습니다! 완벽합니다 🎉";
+          msgDesc.textContent = "현재 오답으로 분류된 개념이 없습니다. 전체 보기에서 계속 복습하거나 새로운 개념을 추가해보세요.";
+          msgActions.innerHTML = `
+            <button class="btn-primary" onclick="setFilter('all')">전체 카드 보기</button>
+            <button class="btn-secondary" onclick="openAddModal()">개념 추가하기</button>
+          `;
+        } else {
+          msgIcon.className = 'stage-icon-circle empty';
+          msgIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+          msgTitle.textContent = "등록된 개념 카드가 없습니다";
+          msgDesc.textContent = "새로운 핵심 개념을 등록하거나 기본 샘플 데이터를 불러와 학습을 시작하세요.";
+          msgActions.innerHTML = `
+            <button class="btn-primary" onclick="openAddModal()">새 개념 추가</button>
+            <button class="btn-secondary" onclick="resetSampleData()">샘플 5개 복원</button>
+          `;
+        }
+        return;
+      }
+
+      // Ensure index boundary
+      if (currentIndex >= currentDeck.length) {
+        currentIndex = currentDeck.length - 1;
+      }
+      if (currentIndex < 0) {
+        currentIndex = 0;
+      }
+
+      cardContainer.style.display = 'block';
+      decisionActions.style.display = 'flex';
+      deckNavigation.style.display = 'flex';
+      stageMessageCard.style.display = 'none';
+
+      const card = currentDeck[currentIndex];
+      document.getElementById('cardKeyword').textContent = card.term;
+      document.getElementById('cardMeaning').textContent = card.definition;
+      document.getElementById('cardCategory').textContent = card.category || 'CORE CONCEPT';
+
+      // Status badges
+      const statusText = card.status === 'known' ? '아는 개념' : (card.status === 'wrong' ? '오답 (주의)' : '학습 전');
+      const statusClass = card.status === 'known' ? 'card-status-badge known' : (card.status === 'wrong' ? 'card-status-badge wrong' : 'card-status-badge unseen');
+
+      const badgeFront = document.getElementById('cardStatusBadge');
+      badgeFront.textContent = statusText;
+      badgeFront.className = statusClass;
+
+      const badgeBack = document.getElementById('cardStatusBadgeBack');
+      badgeBack.textContent = statusText;
+      badgeBack.className = statusClass;
+
+      // Nav Indicator & Disabled state
+      document.getElementById('deckIndicator').textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+      document.getElementById('btnPrev').disabled = currentIndex === 0;
+      document.getElementById('btnNext').disabled = currentIndex === currentDeck.length - 1;
+    }
+
+    // Toggle Card Flip
+    function toggleCardFlip() {
+      const activeCardElem = document.getElementById('activeCardElement');
+      isFlipped = !isFlipped;
+      activeCardElem.classList.toggle('flipped', isFlipped);
+    }
+
+    // Handle Knowledge Decision (Known vs Wrong)
+    function markCurrentCard(decision) {
+      if (!currentDeck || currentDeck.length === 0) return;
+      const card = currentDeck[currentIndex];
+      card.status = decision;
+
+      // Update card in master list
+      const masterIdx = cards.findIndex(c => c.id === card.id);
+      if (masterIdx !== -1) {
+        cards[masterIdx].status = decision;
+      }
+
+      saveCardsToStorage();
+
+      showToast(decision === 'known' ? '✨ 아는 개념으로 기록됨' : '📌 오답 노트에 저장됨');
+
+      // Advance to next card smoothly
+      if (currentIndex < currentDeck.length - 1) {
+        currentIndex++;
+        renderCurrentCard();
+      } else {
+        // Reached end of current deck
+        if (currentFilter === 'wrong') {
+          // Refresh filtered list
+          applyFilter('wrong');
+        } else {
+          renderCurrentCard();
+        }
+      }
+    }
+
+    // Prev / Next Navigation
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCurrentCard();
+      }
+    }
+
+    function nextCard() {
+      if (currentIndex < currentDeck.length - 1) {
+        currentIndex++;
+        renderCurrentCard();
+      }
+    }
+
+    // Shuffle Current Deck
+    function shuffleCurrentDeck() {
+      if (!currentDeck || currentDeck.length <= 1) return;
+      for (let i = currentDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+      }
+      currentIndex = 0;
+      renderCurrentCard();
+      showToast('🔀 카드가 무작위로 섞였습니다');
+    }
+
+    // Stats & Progress Bar
+    function updateStatsUI() {
+      const total = cards.length;
+      const known = cards.filter(c => c.status === 'known').length;
+      const wrong = cards.filter(c => c.status === 'wrong').length;
+      const unseen = total - (known + wrong);
+
+      document.getElementById('knownCount').textContent = known;
+      document.getElementById('wrongCount').textContent = wrong;
+      document.getElementById('remainCount').textContent = Math.max(0, unseen);
+
+      document.getElementById('badgeAllCount').textContent = total;
+      document.getElementById('badgeWrongCount').textContent = wrong;
+
+      const percent = total > 0 ? Math.round(((known + wrong) / total) * 100) : 0;
+      document.getElementById('progressPercent').textContent = `${percent}%`;
+      document.getElementById('progressBarFill').style.width = `${percent}%`;
+    }
+
+    // 30-min Countdown Timer
+    function setupTimer() {
+      updateTimerDisplay();
+      document.getElementById('timerToggleBtn').addEventListener('click', toggleTimer);
+      document.getElementById('timerResetBtn').addEventListener('click', resetTimer);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timerRemaining / 60);
+      const seconds = timerRemaining % 60;
+      const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const displayElem = document.getElementById('timerDisplay');
+      displayElem.textContent = formatted;
+
+      const pillElem = document.getElementById('timerPill');
+      if (timerRemaining <= 5 * 60 && timerRemaining > 0) {
+        pillElem.classList.add('urgent');
+      } else {
+        pillElem.classList.remove('urgent');
+      }
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      if (timerRemaining <= 0) timerRemaining = TOTAL_SECONDS;
+      isTimerRunning = true;
+      document.getElementById('timerIconPlay').innerHTML = `
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      `;
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          updateTimerDisplay();
+        } else {
+          pauseTimer();
+          showToast('⏰ 30분 타이머 종료! 시험 직전 집중 완료!');
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isTimerRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('timerIconPlay').innerHTML = `
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      `;
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerRemaining = TOTAL_SECONDS;
+      updateTimerDisplay();
+      showToast('⏱ 30분으로 타이머 리셋');
+    }
+
+    // Keyboard Shortcuts
+    function setupKeyboardShortcuts() {
+      window.addEventListener('keydown', (e) => {
+        // Do not intercept if user is typing in form inputs
+        const targetTag = e.target.tagName.toLowerCase();
+        if (targetTag === 'input' || targetTag === 'textarea') return;
+
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          toggleCardFlip();
+        } else if (e.key === '1' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          markCurrentCard('wrong');
+        } else if (e.key === '2' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          markCurrentCard('known');
+        } else if (e.key === 'ArrowDown' || e.key === 'j') {
+          e.preventDefault();
+          nextCard();
+        } else if (e.key === 'ArrowUp' || e.key === 'k') {
+          e.preventDefault();
+          prevCard();
+        }
+      });
+    }
+
+    // Modal: Add Concept
+    function openAddModal() {
+      document.getElementById('addConceptForm').reset();
+      document.getElementById('addModalOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('inputTerm').focus(), 100);
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModalOverlay').classList.remove('open');
+    }
+
+    function handleAddConcept(e) {
+      e.preventDefault();
+      const term = document.getElementById('inputTerm').value.trim();
+      const def = document.getElementById('inputDef').value.trim();
+      const cat = document.getElementById('inputCategory').value.trim();
+
+      if (!term || !def) return;
+
+      const newCard = {
+        id: 'card-' + Date.now(),
+        term: term,
+        definition: def,
+        category: cat || '핵심 개념',
+        status: 'unseen'
+      };
+
+      cards.unshift(newCard);
+      saveCardsToStorage();
+      closeAddModal();
+      applyFilter(currentFilter);
+      showToast('✅ 새 개념이 성공적으로 등록되었습니다');
+    }
+
+    // Modal: Manage Concept List
+    function openManageModal() {
+      renderManageItems(cards);
+      document.getElementById('manageModalOverlay').classList.add('open');
+    }
+
+    function closeManageModal() {
+      document.getElementById('manageModalOverlay').classList.remove('open');
+    }
+
+    function filterManageList() {
+      const q = document.getElementById('manageSearchInput').value.toLowerCase().trim();
+      const filtered = cards.filter(c => 
+        c.term.toLowerCase().includes(q) || 
+        c.definition.toLowerCase().includes(q) ||
+        (c.category && c.category.toLowerCase().includes(q))
+      );
+      renderManageItems(filtered);
+    }
+
+    function renderManageItems(items) {
+      const container = document.getElementById('manageItemsContainer');
+      document.getElementById('manageListCount').textContent = `${items.length}개`;
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.88rem;">
+            등록된 개념이 없습니다.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(c => `
+        <div class="list-card" id="list-item-${c.id}">
+          <div class="list-card-content">
+            <div class="list-card-term">
+              <span>${escapeHtml(c.term)}</span>
+              <span class="card-category-tag">${escapeHtml(c.category || '개념')}</span>
+              <span style="font-size: 0.72rem; color: ${c.status === 'known' ? '#34d399' : (c.status === 'wrong' ? '#fb7185' : 'var(--text-muted)')}; font-weight: 600;">
+                ${c.status === 'known' ? '● 아는 개념' : (c.status === 'wrong' ? '▲ 오답' : '○ 미학습')}
+              </span>
+            </div>
+            <div class="list-card-def">${escapeHtml(c.definition)}</div>
+          </div>
+          <button class="btn-icon-danger" onclick="deleteCard('${c.id}')" title="삭제">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function deleteCard(id) {
+      cards = cards.filter(c => c.id !== id);
+      saveCardsToStorage();
+      filterManageList();
+      applyFilter(currentFilter);
+      showToast('🗑 개념 카드가 삭제되었습니다');
+    }
+
+    function clearAllData() {
+      if (confirm('정말로 모든 개념 카드를 삭제하시겠습니까?')) {
+        cards = [];
+        saveCardsToStorage();
+        filterManageList();
+        applyFilter(currentFilter);
+        showToast('모든 카드가 삭제되었습니다');
+      }
+    }
+
+    function resetSampleData() {
+      cards = JSON.parse(JSON.stringify(DEFAULT_SAMPLES));
+      saveCardsToStorage();
+      filterManageList();
+      applyFilter('all');
+      showToast('기본 샘플 5개 개념으로 복원되었습니다');
+    }
+
+    // Backdrop click close
+    function handleBackdropClick(e, overlayId) {
+      if (e.target.id === overlayId) {
+        document.getElementById(overlayId).classList.remove('open');
+      }
+    }
+
+    // Helper: Toast Message
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Run on load
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
